@@ -14,11 +14,12 @@ def plotly_lineplot(dfs, x_data, x_max, df_cptnames, d_width, d_height):
     fig = go.Figure()
 
     # Diagram mérete, margók
-    fig.update_layout(autosize=False, 
+    fig.update_layout(template= 'plotly',
+                      autosize= False, 
                       width= d_width, 
                       height= d_height,
-                      margin=dict(l=70, r=20, t=60, b=20),
-                      plot_bgcolor="white")
+                      margin= dict(l=70, r=20, t=60, b=20),
+                      plot_bgcolor= "white")
 
     # CPT adatsorok plottolása
     for i in range(len(dfs)):
