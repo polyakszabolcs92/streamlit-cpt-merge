@@ -41,7 +41,7 @@ with col1:
         sheet_ID = st.text_input("Sheet name", value = 'Munka1')
     col_data = st.text_input("Columns - z [m], qc [MPa], Rf [%]", 
                              value="A, B, H",
-                             help= """If the data is not on the first sheet, then """)
+                             help= "Define the column ID's where z, qc, Rf data is located.")
 
 with col2:
     header_row = st.number_input("Header data row #", min_value= 1, step= 1,
