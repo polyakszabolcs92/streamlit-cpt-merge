@@ -86,7 +86,7 @@ with col1:
         x_max_value = st.slider("Maximum value on X axis", max_value= 8, value=4)
 
 with col2:
-    plot_width = st.slider("Diagram width (px)", min_value=100, max_value=2000, value=800, step=50)
+    plot_width = st.slider("Diagram width (px)", min_value=100, max_value=2000, value=600, step=50)
     plot_height = st.slider("Diagram height (px)", min_value=100, max_value=2000, value=800, step=50)
 
 
