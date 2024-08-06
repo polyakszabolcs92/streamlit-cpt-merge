@@ -16,9 +16,8 @@ uploaded_files = st.file_uploader("Upload Excel files (.xls, .xlsx)",
 
 # H.abs DYNAMIC INPUT TABLE
 # Extract file names of uploaded files
-file_names = [file.name for file in uploaded_files]
-
-
+files = [file.name for file in uploaded_files]  # read filenames
+file_names = [(f.split(".")[0]) for f in files] # split and get first part of filename
 
 # Create DataFrame
 H_default_values = (np.full(shape=(len(file_names)), fill_value=100.01)).tolist()
