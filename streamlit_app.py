@@ -118,8 +118,8 @@ with dcol1:
 
     # Add a button to download the figure as a PDF
     st.download_button(label="Download as PNG",
-                        data=png_buffer,
-                        file_name= project_ID + "_merged CPT data_"+ xaxis_data +".png")
+                       data=png_buffer,
+                       file_name= project_ID + "_merged CPT data_"+ xaxis_data +".png")
 
 with dcol2:
     # Save the figure to a PDF buffer
@@ -131,8 +131,8 @@ with dcol2:
 
     # Add a button to download the figure as a PDF
     st.download_button(label="Download as PDF",
-                        data=pdf_buffer,
-                        file_name= project_ID + "_merged CPT data_"+ xaxis_data +".pdf")
+                       data=pdf_buffer,
+                       file_name= project_ID + "_merged CPT data_"+ xaxis_data +".pdf")
 
 with dcol3:
     # Save the figure as an HTML file
