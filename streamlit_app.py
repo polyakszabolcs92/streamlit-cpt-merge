@@ -103,17 +103,28 @@ dcol1, dcol2 = st.columns(2)
 with dcol1:
     # Save the figure to a PDF buffer
     pdf_buffer = io.BytesIO()
-    fig.write_image(pdf_buffer, format='pdf')
+    fig.write_image(pdf_buffer, format='pdf', engine='kaleido')
 
     # Reset the buffer position to the beginning
     pdf_buffer.seek(0)
 
     # Add a button to download the figure as a PDF
-    st.download_button(
-        label="Download as PDF",
-        data=pdf_buffer,
-        file_name="vetu_figure.pdf",
-        mime="application/pdf")
+    st.download_button(label="Download as PDF",
+                       data=pdf_buffer,
+                       file_name="vetu_figure.pdf")
+
+with dcol2:
+    # Save the figure to a PNG buffer
+    png_buffer = io.BytesIO()
+    fig.write_image(png_buffer, format='png', engine='kaleido')
+
+    # Reset the buffer position to the beginning
+    png_buffer.seek(0)
+
+    # Add a button to download the figure as a PDF
+    st.download_button(label="Download as PNG",
+                       data=png_buffer,
+                       file_name="vetu_figure.png")
 
 #-------------------------------------------------------
 # TABLE RESULTS
