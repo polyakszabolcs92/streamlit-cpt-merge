@@ -3,12 +3,11 @@ import pandas as pd
 import plotly.graph_objects as go
 import numpy as np
 import io
+import kaleido
 
 from functions import *
 
 #----------------------------------------------
-st.title("CPT DATA MERGER")
-
 # CPT DATA IMPORT
 st.header("CPT DATA IMPORT")
 uploaded_files = st.file_uploader("Upload Excel files (.xls, .xlsx)",
@@ -28,56 +27,97 @@ df = (pd.DataFrame([file_names, H_default_values],
 edited_df = st.data_editor(df, num_rows="dynamic")
 
 #-------------------------------------------------
+sheet_type = st.toggle("Sheet number (False) / Sheet name (True)", value=False,
+                       help = "Decides if the number (int) or the name (string) of the sheet will be defined.")
+
 col1, col2 = st.columns(2)
 
 with col1:
-    sheet_ID = st.text_input("Sheet ID", value = None)
+    if sheet_type == False:
+        sheet_ID = st.number_input("Sheet Number (0: get data from first sheet)", value = 0, step=1)
+    else:
+        sheet_ID = st.text_input("Sheet name", value = 'Munka1')
+    col_data = st.text_input("Columns - z [m], qc [MPa], Rf [%]", 
+                             value="A, B, H",
+                             help= """If the data is not on the first sheet, then """)
+
+with col2:
     header_row = st.number_input("Header data row #", min_value= 1, step= 1,
-                                 help= "Row number containig the column headers in the Excel file")
+                                 help= "Row number containing the column headers in the Excel file")
     data_startrow = st.number_input("Data start row", min_value= 2, value= 2, step= 1,
                                     help= "Row with z = 0.00 [m] data")
 
-with col2:
-    col_data = st.text_input("Columns - z [m], qc [MPa], Rf [%]", 
-                             value="A, B, C")
+# Excel import to Pandas DatFrames
+dataframes = [] #empty container
 
-# 
-dataframes = []
+
 for uploaded_file in uploaded_files:
     read_df = pd.read_excel(uploaded_file,
-                            sheet_name= 0,
+                            sheet_name= sheet_ID,
                             header = header_row-1,
                             skiprows = data_startrow-2,
                             usecols= col_data,
                             names= ['z', 'qc', 'Rf'])
     dataframes.append(read_df)
 
-# 'z [m]' oszlop relatívból abszolút magasság, és új SBT index oszlop
+# 'z' column conversion to absoulute height, new SBT index column
 for i in range(len(dataframes)):
     dataframes[i]['z'] = edited_df.iloc[i][1] - dataframes[i]['z']
     dataframes[i]['SBT'] = SBT(qc= dataframes[i]['qc'],
                                Rf= dataframes[i]['Rf'])
 
-
-
+#-----------------------------------------------------
 # PLOTTING
 st.divider()
-xaxis_data = st.selectbox("Data on X-axis",
-                          options=['qc', 'Rf', 'SBT'])
+st.header("PLOT")
 
-if xaxis_data == 'qc':
-    x_max_value = st.slider("Maximum value on X axis", max_value= 100, value=30)
-elif xaxis_data == 'Rf':
-    x_max_value = st.slider("Maximum value on X axis", max_value= 10, value=5)
-else:
-    x_max_value = st.slider("Maximum value on X axis", max_value= 6, value=4)
+col1, col2 = st.columns(2)
+
+with col1:
+    xaxis_data = st.selectbox("Data on X-axis",
+                            options=['qc', 'Rf', 'SBT'])
+    if xaxis_data == 'qc':
+        x_max_value = st.slider("Maximum value on X axis", max_value= 100, value=30, step=5)
+    elif xaxis_data == 'Rf':
+        x_max_value = st.slider("Maximum value on X axis", max_value= 10, value=5)
+    else:
+        x_max_value = st.slider("Maximum value on X axis", max_value= 8, value=4)
+
+with col2:
+    plot_width = st.slider("Diagram width (px)", min_value=100, max_value=2000, value=800, step=50)
+    plot_height = st.slider("Diagram height (px)", min_value=100, max_value=2000, value=800, step=50)
 
 
 fig = plotly_lineplot(dfs=dataframes,
                       x_data= xaxis_data,
                       x_max=x_max_value,
                       df_cptnames= edited_df,
-                      d_width=800,
-                      d_height=800)
+                      d_width=plot_width,
+                      d_height=plot_height)
 
 st.plotly_chart(fig)
+
+# Download image as pdf or png
+
+dcol1, dcol2 = st.columns(2)
+with dcol1:
+    # Save the figure to a PDF buffer
+    pdf_buffer = io.BytesIO()
+    fig.write_image(pdf_buffer, format='pdf')
+
+    # Reset the buffer position to the beginning
+    pdf_buffer.seek(0)
+
+    # Add a button to download the figure as a PDF
+    st.download_button(
+        label="Download as PDF",
+        data=pdf_buffer,
+        file_name="vetu_figure.pdf",
+        mime="application/pdf")
+
+#-------------------------------------------------------
+# TABLE RESULTS
+expander = st.expander("Table results", expanded=False)
+df_nr = expander.slider("DataFrame Index", min_value=0, max_value=(len(dataframes)-1))
+expander.write(dataframes[df_nr])
+

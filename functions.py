@@ -100,8 +100,9 @@ def plotly_lineplot(dfs, x_data, x_max, df_cptnames, d_width, d_height):
                                                 family = "Arial",
                                                 size = 11)))
     
+
     if x_data == 'SBT':
-        opacity_SBT = 0.15
+        opacity_SBT = 0.10
         ann_position = "bottom left"
 
 
