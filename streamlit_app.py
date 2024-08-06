@@ -44,10 +44,10 @@ with col1:
                              help= "Define the column ID's where z, qc, Rf data is located.")
 
 with col2:
-    header_row = st.number_input("Header data row #", min_value= 1, step= 1,
+    header_row = st.number_input("Header data row", min_value= 1, step= 1,
                                  help= "Row number containing the column headers in the Excel file")
-    data_startrow = st.number_input("Data start row", min_value= 2, value= 2, step= 1,
-                                    help= "Row with z = 0.00 [m] data")
+    data_startrow = st.number_input("Data start rows (from header)", min_value= 1, value= 1, step= 1,
+                                    help= "Row with 'z' starting data, after header row")
 
 # Excel import to Pandas DatFrames
 dataframes = [] #empty container
@@ -57,7 +57,7 @@ for uploaded_file in uploaded_files:
     read_df = pd.read_excel(uploaded_file,
                             sheet_name= sheet_ID,
                             header = header_row-1,
-                            skiprows = data_startrow-2,
+                            skiprows = data_startrow-1,
                             usecols= col_data,
                             names= ['z', 'qc', 'Rf'])
     dataframes.append(read_df)
@@ -77,7 +77,8 @@ col1, col2 = st.columns(2)
 
 with col1:
     xaxis_data = st.selectbox("Data on X-axis",
-                            options=['qc', 'Rf', 'SBT'])
+                            options=['qc', 'Rf', 'SBT'],
+                            help= "Select the preferred column from qc, Rf or SBT index.")
     if xaxis_data == 'qc':
         x_max_value = st.slider("Maximum value on X axis", max_value= 100, value=30, step=5)
     elif xaxis_data == 'Rf':
@@ -97,11 +98,12 @@ fig = plotly_lineplot(dfs= dataframes,
                       d_width= plot_width,
                       d_height= plot_height)
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, use_container_width=False)
 
 
 # Project Name
-project_ID = st.text_input("Project name", value="Sample project")
+project_ID = st.text_input("Project name", value="Sample project",
+                           help= "Name of the project")
 
 #---------------------------------------------------------------
 # DOWNLOAD IMAGE AS PDF, PNG OR HTML FILE
