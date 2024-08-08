@@ -57,8 +57,7 @@ with col2:
 
 # Excel import to Pandas DatFrames
 @st.cache_data
-def dataframe_import(upl_files):
-    
+def file_import_to_pandas(upl_files):
     df = [] #empty container
 
     for uploaded_file in upl_files:
@@ -70,16 +69,16 @@ def dataframe_import(upl_files):
                                 names= ['z', 'qc', 'Rf'])
         df.append(read_df)
 
-    # 'z' column conversion to absoulute height, new SBT index column
-    for i in range(len(df)):
-        df[i]['z'] = edited_df.iloc[i][1] - df[i]['z']
-        df[i]['SBT'] = SBT(qc= df[i]['qc'],
-                                Rf= df[i]['Rf'])
-    
     return df
 
-dataframes = dataframe_import(uploaded_files)
+dataframes = file_import_to_pandas(uploaded_files)
 
+# 'z' column conversion to absolute height, new SBT index column
+for i in range(len(dataframes)):
+    dataframes[i]['z'] = edited_df.iloc[i][1] - dataframes[i]['z']
+    dataframes[i]['SBT'] = SBT(qc= dataframes[i]['qc'],
+                               Rf= dataframes[i]['Rf'])
+ 
 #-----------------------------------------------------
 # PLOTTING
 st.divider()
@@ -99,7 +98,7 @@ with col1:
         x_max_value = st.slider("Maximum value on X axis", max_value= 8, value=4)
 
 with col2:
-    plot_width = st.slider("Diagram width (px)", min_value=100, max_value=1000, value=500, step=50)
+    plot_width = st.slider("Diagram width (px)", min_value=100, max_value=1000, value=600, step=50)
     plot_height = st.slider("Diagram height (px)", min_value=100, max_value=2000, value=800, step=50)
 
 
@@ -166,5 +165,8 @@ with dcol3:
 #-------------------------------------------------------
 # TABLE RESULTS
 expander = st.expander("View Table Results", expanded=False)
-df_name = expander.selectbox("Select Table", options= file_names, index= 0)
-expander.write(dataframes[file_names.index(df_name)])
+if len(files) > 0:
+    df_name = expander.selectbox("Select Table", options= file_names, index= 0)
+    expander.write(dataframes[file_names.index(df_name)])
+else:
+    expander.markdown("No files uploaded yet!")
