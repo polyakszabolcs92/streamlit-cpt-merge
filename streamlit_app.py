@@ -7,6 +7,9 @@ import tempfile
 
 from functions import *
 
+# The page title, shown in the browser tab
+st.set_page_config(page_title= "CPT Merger by PSZ")
+
 #----------------------------------------------
 # CPT DATA IMPORT
 st.header("CPT DATA IMPORT")
@@ -49,34 +52,33 @@ with col1:
 with col2:
     header_row = st.number_input("Header data row", min_value= 1, step= 1,
                                  help= "Row number containing the column headers in the Excel file")
-    data_startrow = st.number_input("Data start rows (from header)", min_value= 1, value= 1, step= 1,
-                                    help= "Row with 'z' starting data, after header row")
+    data_startrow = st.number_input("Number of rows from header where data starts", min_value= 1, value= 1, step= 1,
+                                    help= "Row with 'z = 0.00' starting data, after header row")
 
 # Excel import to Pandas DatFrames
 @st.cache_data
-def dataframe_import():
+def dataframe_import(upl_files):
     
-    dataframes = [] #empty container
+    df = [] #empty container
 
-
-    for uploaded_file in uploaded_files:
+    for uploaded_file in upl_files:
         read_df = pd.read_excel(uploaded_file,
                                 sheet_name= sheet_ID,
                                 header = header_row-1,
                                 skiprows = data_startrow-1,
                                 usecols= col_data,
                                 names= ['z', 'qc', 'Rf'])
-        dataframes.append(read_df)
+        df.append(read_df)
 
     # 'z' column conversion to absoulute height, new SBT index column
-    for i in range(len(dataframes)):
-        dataframes[i]['z'] = edited_df.iloc[i][1] - dataframes[i]['z']
-        dataframes[i]['SBT'] = SBT(qc= dataframes[i]['qc'],
-                                Rf= dataframes[i]['Rf'])
+    for i in range(len(df)):
+        df[i]['z'] = edited_df.iloc[i][1] - df[i]['z']
+        df[i]['SBT'] = SBT(qc= df[i]['qc'],
+                                Rf= df[i]['Rf'])
     
-    return dataframes
+    return df
 
-dataframes = dataframe_import()
+dataframes = dataframe_import(uploaded_files)
 
 #-----------------------------------------------------
 # PLOTTING
@@ -163,6 +165,6 @@ with dcol3:
 
 #-------------------------------------------------------
 # TABLE RESULTS
-expander = st.expander("Table results", expanded=False)
-df_nr = expander.slider("DataFrame Index", min_value=0, max_value=max(len(dataframes)-1, 1))
-expander.write(dataframes[df_nr])
+expander = st.expander("View Table Results", expanded=False)
+df_name = expander.selectbox("Select Table", options= file_names, index= 0)
+expander.write(dataframes[file_names.index(df_name)])
