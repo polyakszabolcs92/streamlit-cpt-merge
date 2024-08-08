@@ -10,9 +10,10 @@ from functions import *
 #----------------------------------------------
 # CPT DATA IMPORT
 st.header("CPT DATA IMPORT")
+
 uploaded_files = st.file_uploader("Upload Excel files (.xls, .xlsx)",
-                               type= ['xls', 'xlsx'],
-                               accept_multiple_files=True)
+                                  type= ['xls', 'xlsx'],
+                                  accept_multiple_files=True)
 
 # H.abs DYNAMIC INPUT TABLE
 # Extract file names of uploaded files
@@ -29,14 +30,16 @@ df = (pd.DataFrame([file_names, H_default_values],
 edited_df = st.data_editor(df, num_rows="dynamic")
 
 #-------------------------------------------------
-sheet_type = st.toggle("Sheet number (False) / Sheet name (True)", value=False,
-                       help = "Decides if the number (int) or the name (string) of the sheet will be defined.")
+sheet_type = st.radio("Import data from sheet as", options=['Sheet Number', 'Sheet Name'],
+                      index= 0,
+                      help = "Decides if the number (int) or the name (string) of the sheet will be defined.")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    if sheet_type == False:
-        sheet_ID = st.number_input("Sheet Number (0: automatically get data from first sheet)", value = 0, step=1)
+    if sheet_type == "Sheet Number":
+        sheet_ID = st.number_input("Sheet Number (0: automatically get data from first sheet)", 
+                                   value = 0, step=1)
     else:
         sheet_ID = st.text_input("Sheet name", value = 'Munka1')
     col_data = st.text_input("Columns - z [m], qc [MPa], Rf [%]", 
@@ -50,23 +53,30 @@ with col2:
                                     help= "Row with 'z' starting data, after header row")
 
 # Excel import to Pandas DatFrames
-dataframes = [] #empty container
+@st.cache_data
+def dataframe_import():
+    
+    dataframes = [] #empty container
 
 
-for uploaded_file in uploaded_files:
-    read_df = pd.read_excel(uploaded_file,
-                            sheet_name= sheet_ID,
-                            header = header_row-1,
-                            skiprows = data_startrow-1,
-                            usecols= col_data,
-                            names= ['z', 'qc', 'Rf'])
-    dataframes.append(read_df)
+    for uploaded_file in uploaded_files:
+        read_df = pd.read_excel(uploaded_file,
+                                sheet_name= sheet_ID,
+                                header = header_row-1,
+                                skiprows = data_startrow-1,
+                                usecols= col_data,
+                                names= ['z', 'qc', 'Rf'])
+        dataframes.append(read_df)
 
-# 'z' column conversion to absoulute height, new SBT index column
-for i in range(len(dataframes)):
-    dataframes[i]['z'] = edited_df.iloc[i][1] - dataframes[i]['z']
-    dataframes[i]['SBT'] = SBT(qc= dataframes[i]['qc'],
-                               Rf= dataframes[i]['Rf'])
+    # 'z' column conversion to absoulute height, new SBT index column
+    for i in range(len(dataframes)):
+        dataframes[i]['z'] = edited_df.iloc[i][1] - dataframes[i]['z']
+        dataframes[i]['SBT'] = SBT(qc= dataframes[i]['qc'],
+                                Rf= dataframes[i]['Rf'])
+    
+    return dataframes
+
+dataframes = dataframe_import()
 
 #-----------------------------------------------------
 # PLOTTING
@@ -87,7 +97,7 @@ with col1:
         x_max_value = st.slider("Maximum value on X axis", max_value= 8, value=4)
 
 with col2:
-    plot_width = st.slider("Diagram width (px)", min_value=100, max_value=2000, value=600, step=50)
+    plot_width = st.slider("Diagram width (px)", min_value=100, max_value=1000, value=500, step=50)
     plot_height = st.slider("Diagram height (px)", min_value=100, max_value=2000, value=800, step=50)
 
 
