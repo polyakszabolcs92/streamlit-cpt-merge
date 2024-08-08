@@ -57,28 +57,32 @@ with col2:
 
 # Excel import to Pandas DatFrames
 @st.cache_data
-def file_import_to_pandas(upl_files):
+def file_import_to_pandas(upl_files, sh_ID, h_row, startrow, data_cols):
     df = [] #empty container
 
     for uploaded_file in upl_files:
         read_df = pd.read_excel(uploaded_file,
-                                sheet_name= sheet_ID,
-                                header = header_row-1,
-                                skiprows = data_startrow-1,
-                                usecols= col_data,
+                                sheet_name= sh_ID,
+                                header = h_row-1,
+                                skiprows = startrow-1,
+                                usecols= data_cols,
                                 names= ['z', 'qc', 'Rf'])
         df.append(read_df)
 
     return df
 
-dataframes = file_import_to_pandas(uploaded_files)
+dataframes = file_import_to_pandas(uploaded_files,
+                                   sheet_ID,
+                                   header_row,
+                                   data_startrow,
+                                   col_data)
 
 # 'z' column conversion to absolute height, new SBT index column
 for i in range(len(dataframes)):
     dataframes[i]['z'] = edited_df.iloc[i][1] - dataframes[i]['z']
     dataframes[i]['SBT'] = SBT(qc= dataframes[i]['qc'],
                                Rf= dataframes[i]['Rf'])
- 
+
 #-----------------------------------------------------
 # PLOTTING
 st.divider()
@@ -93,7 +97,7 @@ with col1:
     if xaxis_data == 'qc':
         x_max_value = st.slider("Maximum value on X axis", max_value= 100, value=30, step=5)
     elif xaxis_data == 'Rf':
-        x_max_value = st.slider("Maximum value on X axis", max_value= 10, value=5)
+        x_max_value = st.slider("Maximum value on X axis", max_value= 10, value=6)
     else:
         x_max_value = st.slider("Maximum value on X axis", max_value= 8, value=4)
 
