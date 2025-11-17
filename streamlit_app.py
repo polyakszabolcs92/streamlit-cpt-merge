@@ -113,7 +113,7 @@ fig = plotly_lineplot(dfs= dataframes,
                       d_width= plot_width,
                       d_height= plot_height)
 
-st.plotly_chart(fig, use_container_width=False)
+st.plotly_chart(fig, width='content')
 
 
 # Project Name
