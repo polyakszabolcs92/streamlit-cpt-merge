@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import numpy as np
 import io
 import tempfile
+import kaleido
 
 from functions import *
 
