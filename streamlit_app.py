@@ -127,7 +127,7 @@ dcol1, dcol2, dcol3 = st.columns(3, gap='small')
 with dcol1:
     # Save the figure to a PNG buffer
     png_buffer = io.BytesIO()
-    fig.write_image(png_buffer, format='png', scale=2, engine='kaleido')
+    fig.write_image(png_buffer, format='png', scale=2)
 
     # Reset the buffer position to the beginning
     png_buffer.seek(0)
@@ -140,7 +140,7 @@ with dcol1:
 with dcol2:
     # Save the figure to a PDF buffer
     pdf_buffer = io.BytesIO()
-    fig.write_image(pdf_buffer, format='pdf', scale=2, engine='kaleido')
+    fig.write_image(pdf_buffer, format='pdf', scale=2)
 
     # Reset the buffer position to the beginning
     pdf_buffer.seek(0)
